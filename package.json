@@ -1,0 +1,17 @@
+{
+	"name": "voxel",
+	"private": true,
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build"
+	},
+	"dependencies": {
+		"three": "^0.183.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.8",
+		"@types/three": "^0.183.1",
+		"typescript": "~5.9.3",
+		"vite": "^6.0.0"
+	}
+}
