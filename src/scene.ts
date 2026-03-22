@@ -2,30 +2,22 @@ import {
 	AmbientLight,
 	Color,
 	DirectionalLight,
-	PerspectiveCamera,
+	Fog,
 	Scene,
 	WebGLRenderer,
 } from "three";
 
 export interface SceneContext {
 	scene: Scene;
-	camera: PerspectiveCamera;
 	renderer: WebGLRenderer;
 }
 
 export const createScene = (): SceneContext => {
-	const camera = new PerspectiveCamera(
-		45,
-		window.innerWidth / window.innerHeight,
-		1,
-		10000,
-	);
-	camera.position.set(500, 800, 1300);
-	camera.lookAt(0, 0, 0);
-
 	const scene = new Scene();
-	scene.background = new Color(0xf0f0f0);
+	scene.background = new Color(0x87ceeb);
+	scene.fog = new Fog(0x87ceeb, 500, 2000);
 
+	// Lights
 	const ambientLight = new AmbientLight(0x606060, 3);
 	scene.add(ambientLight);
 
@@ -34,9 +26,9 @@ export const createScene = (): SceneContext => {
 	scene.add(directionalLight);
 
 	const renderer = new WebGLRenderer({ antialias: true });
-	renderer.setPixelRatio(window.devicePixelRatio);
+	renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(renderer.domElement);
 
-	return { scene, camera, renderer };
+	return { scene, renderer };
 };

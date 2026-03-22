@@ -4,11 +4,84 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<title>Voxel</title>
+	<title>Voxel Space</title>
+	<style>
+		body {
+			margin: 0;
+			background-color: #87ceeb;
+		}
+
+		#blocker {
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.5);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 200;
+			cursor: pointer;
+		}
+
+		#instructions {
+			color: #fff;
+			font-family: sans-serif;
+			text-align: center;
+			font-size: 24px;
+		}
+
+		#instructions p {
+			font-size: 14px;
+		}
+
+		#crosshair {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 20px;
+			height: 20px;
+			pointer-events: none;
+			z-index: 100;
+			display: none;
+		}
+
+		#crosshair::before,
+		#crosshair::after {
+			content: "";
+			position: absolute;
+			background: #fff;
+		}
+
+		#crosshair::before {
+			top: 50%;
+			left: 0;
+			width: 100%;
+			height: 2px;
+			transform: translateY(-50%);
+		}
+
+		#crosshair::after {
+			top: 0;
+			left: 50%;
+			width: 2px;
+			height: 100%;
+			transform: translateX(-50%);
+		}
+	</style>
 </head>
 
 <body>
-	Click: Add Voxel, Shift + Click: Del Voxel
+	<div id="blocker">
+		<div id="instructions">
+			Click to Play
+			<p>
+				WASD: Move / Space: Jump<br>
+				Click: Place voxel / Shift+Click: Remove voxel<br>
+				Esc: Pause
+			</p>
+		</div>
+	</div>
+	<div id="crosshair"></div>
 	<script type="module" src="/src/main.ts"></script>
 </body>
 
