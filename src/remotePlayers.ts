@@ -1,12 +1,5 @@
-import {
-	BoxGeometry,
-	Group,
-	Mesh,
-	MeshLambertMaterial,
-	type Scene,
-} from "three";
-
-const PLAYER_HEIGHT = 80;
+import type { Group, Scene } from "three";
+import { createCharacterGroup, PLAYER_HEIGHT } from "./character";
 
 interface RemotePlayer {
 	group: Group;
@@ -23,25 +16,10 @@ export const createRemotePlayerManager = (
 ): RemotePlayerManager => {
 	const players = new Map<string, RemotePlayer>();
 
-	// Shared geometry/material for all remote players
-	const bodyGeo = new BoxGeometry(30, 60, 30);
-	const bodyMat = new MeshLambertMaterial({ color: 0x4488aa });
-	const headGeo = new BoxGeometry(24, 24, 24);
-	const headMat = new MeshLambertMaterial({ color: 0x66aacc });
-
 	const add = (id: string, x: number, y: number, z: number, ry: number) => {
 		if (players.has(id)) return;
 
-		const group = new Group();
-
-		const body = new Mesh(bodyGeo, bodyMat);
-		body.position.y = 30;
-		group.add(body);
-
-		const head = new Mesh(headGeo, headMat);
-		head.position.y = 72;
-		group.add(head);
-
+		const group = createCharacterGroup(0x4488aa, 0x66aacc);
 		group.position.set(x, y - PLAYER_HEIGHT, z);
 		group.rotation.y = ry;
 		scene.add(group);

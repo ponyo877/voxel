@@ -1,14 +1,11 @@
 import {
-	BoxGeometry,
-	Group,
-	Mesh,
-	MeshLambertMaterial,
 	PerspectiveCamera,
 	type Scene,
 	Vector3,
 	type WebGLRenderer,
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls.js";
+import { createCharacterGroup, PLAYER_HEIGHT } from "./character";
 import {
 	applyGravity,
 	CODE_TO_KEY,
@@ -16,7 +13,6 @@ import {
 	type MovementKey,
 } from "./logic/physics";
 
-const PLAYER_HEIGHT = 80;
 const MOVE_SPEED = 400;
 const JUMP_SPEED = 350;
 const GRAVITY = 980;
@@ -40,22 +36,7 @@ export const createPlayer = (
 	camera.position.set(0, PLAYER_HEIGHT, 500);
 
 	const controls = new PointerLockControls(camera, renderer.domElement);
-
-	// Simple character body
-	const character = new Group();
-
-	const bodyGeo = new BoxGeometry(30, 60, 30);
-	const bodyMat = new MeshLambertMaterial({ color: 0x44aa88 });
-	const body = new Mesh(bodyGeo, bodyMat);
-	body.position.y = 30;
-	character.add(body);
-
-	const headGeo = new BoxGeometry(24, 24, 24);
-	const headMat = new MeshLambertMaterial({ color: 0x66ccaa });
-	const head = new Mesh(headGeo, headMat);
-	head.position.y = 72;
-	character.add(head);
-
+	const character = createCharacterGroup(0x44aa88, 0x66ccaa);
 	scene.add(character);
 
 	// Blocker / crosshair UI
@@ -109,12 +90,10 @@ export const createPlayer = (
 	const update = (delta: number) => {
 		if (!controls.isLocked) return;
 
-		// Horizontal movement
 		const dir = computeDirection(keys);
 		controls.moveRight(dir.x * MOVE_SPEED * delta);
 		controls.moveForward(-dir.z * MOVE_SPEED * delta);
 
-		// Gravity and ground collision
 		const gravity = applyGravity(
 			{ velocityY: velocity.y, positionY: camera.position.y, canJump },
 			delta,
@@ -124,7 +103,6 @@ export const createPlayer = (
 		camera.position.y = gravity.positionY;
 		canJump = gravity.canJump;
 
-		// Sync character mesh with camera
 		character.position.x = camera.position.x;
 		character.position.z = camera.position.z;
 		character.position.y = camera.position.y - PLAYER_HEIGHT;

@@ -77,10 +77,8 @@ export const sendMove = (
 ): void => {
 	const now = performance.now();
 	if (now - lastMoveSent < MOVE_INTERVAL_MS) return;
-	if (ws.readyState !== WebSocket.OPEN) return;
-
 	lastMoveSent = now;
-	ws.send(JSON.stringify({ type: "move", x, y, z, ry }));
+	send(ws, { type: "move", x, y, z, ry });
 };
 
 export const sendVoxelAdd = (
