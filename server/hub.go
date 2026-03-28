@@ -22,11 +22,13 @@ type Player struct {
 type Hub struct {
 	mu      sync.RWMutex
 	players map[string]*Player
+	voxels  map[[3]int]bool
 }
 
 func NewHub() *Hub {
 	return &Hub{
 		players: make(map[string]*Player),
+		voxels:  make(map[[3]int]bool),
 	}
 }
 
@@ -39,13 +41,17 @@ func (h *Hub) AddPlayer(conn *websocket.Conn) *Player {
 		send: make(chan []byte, 64),
 	}
 
-	// Send welcome with existing players
+	// Send welcome with existing players and voxels
 	h.mu.Lock()
 	players := make([]PlayerState, 0, len(h.players))
 	for _, p := range h.players {
 		players = append(players, PlayerState{
 			ID: p.id, X: p.x, Y: p.y, Z: p.z, RY: p.ry,
 		})
+	}
+	voxels := make([][3]int, 0, len(h.voxels))
+	for pos := range h.voxels {
+		voxels = append(voxels, pos)
 	}
 	h.players[id] = player
 	h.mu.Unlock()
@@ -54,6 +60,7 @@ func (h *Hub) AddPlayer(conn *websocket.Conn) *Player {
 		Type:    "welcome",
 		ID:      id,
 		Players: players,
+		Voxels:  voxels,
 	}
 	if data, err := json.Marshal(welcome); err == nil {
 		player.send <- data
@@ -87,6 +94,26 @@ func (h *Hub) HandleMessage(player *Player, msg ClientMessage) {
 			Type: "player_move",
 			ID:   player.id,
 			X:    msg.X, Y: msg.Y, Z: msg.Z, RY: msg.RY,
+		})
+
+	case "voxel_add":
+		pos := [3]int{int(msg.X), int(msg.Y), int(msg.Z)}
+		h.mu.Lock()
+		h.voxels[pos] = true
+		h.mu.Unlock()
+
+		h.broadcast(player.id, VoxelAddMessage{
+			Type: "voxel_add", X: pos[0], Y: pos[1], Z: pos[2],
+		})
+
+	case "voxel_remove":
+		pos := [3]int{int(msg.X), int(msg.Y), int(msg.Z)}
+		h.mu.Lock()
+		delete(h.voxels, pos)
+		h.mu.Unlock()
+
+		h.broadcast(player.id, VoxelRemoveMessage{
+			Type: "voxel_remove", X: pos[0], Y: pos[1], Z: pos[2],
 		})
 	}
 }

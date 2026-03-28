@@ -15,6 +15,21 @@ type WelcomeMessage struct {
 	Type    string        `json:"type"`
 	ID      string        `json:"id"`
 	Players []PlayerState `json:"players"`
+	Voxels  [][3]int      `json:"voxels"`
+}
+
+type VoxelAddMessage struct {
+	Type string `json:"type"`
+	X    int    `json:"x"`
+	Y    int    `json:"y"`
+	Z    int    `json:"z"`
+}
+
+type VoxelRemoveMessage struct {
+	Type string `json:"type"`
+	X    int    `json:"x"`
+	Y    int    `json:"y"`
+	Z    int    `json:"z"`
 }
 
 type PlayerState struct {
