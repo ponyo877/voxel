@@ -4,6 +4,7 @@ export interface WelcomeMsg {
 	type: "welcome";
 	id: string;
 	players: { id: string; x: number; y: number; z: number; ry: number }[];
+	voxels: [number, number, number][];
 }
 
 export interface PlayerJoinMsg {
@@ -25,11 +26,27 @@ export interface PlayerMoveMsg {
 	ry: number;
 }
 
+export interface VoxelAddMsg {
+	type: "voxel_add";
+	x: number;
+	y: number;
+	z: number;
+}
+
+export interface VoxelRemoveMsg {
+	type: "voxel_remove";
+	x: number;
+	y: number;
+	z: number;
+}
+
 export type ServerMessage =
 	| WelcomeMsg
 	| PlayerJoinMsg
 	| PlayerLeaveMsg
-	| PlayerMoveMsg;
+	| PlayerMoveMsg
+	| VoxelAddMsg
+	| VoxelRemoveMsg;
 
 // --- Connection ---
 
@@ -46,6 +63,11 @@ export const connectToServer = (url: string): WebSocket => {
 const MOVE_INTERVAL_MS = 66; // ~15 Hz
 let lastMoveSent = 0;
 
+const send = (ws: WebSocket, msg: Record<string, unknown>) => {
+	if (ws.readyState !== WebSocket.OPEN) return;
+	ws.send(JSON.stringify(msg));
+};
+
 export const sendMove = (
 	ws: WebSocket,
 	x: number,
@@ -59,4 +81,22 @@ export const sendMove = (
 
 	lastMoveSent = now;
 	ws.send(JSON.stringify({ type: "move", x, y, z, ry }));
+};
+
+export const sendVoxelAdd = (
+	ws: WebSocket,
+	x: number,
+	y: number,
+	z: number,
+): void => {
+	send(ws, { type: "voxel_add", x, y, z });
+};
+
+export const sendVoxelRemove = (
+	ws: WebSocket,
+	x: number,
+	y: number,
+	z: number,
+): void => {
+	send(ws, { type: "voxel_remove", x, y, z });
 };

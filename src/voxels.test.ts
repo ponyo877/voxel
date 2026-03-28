@@ -80,4 +80,51 @@ describe("createVoxelManager", () => {
 		const voxels = createVoxelManager(scene);
 		expect(scene.children).toContain(voxels.mesh);
 	});
+
+	it("prevents duplicate add at same position", () => {
+		const voxels = createVoxelManager(new Scene());
+		voxels.add(25, 25, 25);
+		voxels.add(25, 25, 25); // duplicate
+		expect(voxels.mesh.count).toBe(1);
+	});
+
+	it("removes by position", () => {
+		const voxels = createVoxelManager(new Scene());
+		voxels.add(25, 25, 25);
+		voxels.add(75, 25, 25);
+
+		voxels.removeByPosition(25, 25, 25);
+		expect(voxels.mesh.count).toBe(1);
+	});
+
+	it("removeByPosition ignores non-existent position", () => {
+		const voxels = createVoxelManager(new Scene());
+		voxels.add(25, 25, 25);
+		voxels.removeByPosition(999, 999, 999);
+		expect(voxels.mesh.count).toBe(1);
+	});
+
+	it("getPosition returns correct coordinates", () => {
+		const voxels = createVoxelManager(new Scene());
+		voxels.add(75, 125, 25);
+		expect(voxels.getPosition(0)).toEqual([75, 125, 25]);
+	});
+
+	it("getPosition returns null for out-of-range", () => {
+		const voxels = createVoxelManager(new Scene());
+		expect(voxels.getPosition(0)).toBeNull();
+	});
+
+	it("position map stays consistent after swap-remove", () => {
+		const voxels = createVoxelManager(new Scene());
+		voxels.add(25, 25, 25); // index 0
+		voxels.add(75, 25, 25); // index 1
+		voxels.add(125, 25, 25); // index 2
+
+		voxels.removeAt(0); // swap: index 2 → index 0
+		// Now removeByPosition should find the swapped voxel
+		voxels.removeByPosition(125, 25, 25);
+		expect(voxels.mesh.count).toBe(1);
+		expect(voxels.getPosition(0)).toEqual([75, 25, 25]);
+	});
 });

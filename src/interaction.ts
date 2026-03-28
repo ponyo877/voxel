@@ -18,6 +18,8 @@ export interface InteractionParams {
 	rollOverMesh: Mesh;
 	plane: Mesh;
 	voxels: VoxelManager;
+	onVoxelAdd?: (x: number, y: number, z: number) => void;
+	onVoxelRemove?: (x: number, y: number, z: number) => void;
 }
 
 export interface InteractionContext {
@@ -30,6 +32,8 @@ export const setupInteraction = ({
 	rollOverMesh,
 	plane,
 	voxels,
+	onVoxelAdd,
+	onVoxelRemove,
 }: InteractionParams): InteractionContext => {
 	const raycaster = new Raycaster();
 	raycaster.far = MAX_DISTANCE;
@@ -70,15 +74,17 @@ export const setupInteraction = ({
 
 		if (isShiftDown) {
 			if (intersect.object === voxels.mesh && intersect.instanceId != null) {
+				const pos = voxels.getPosition(intersect.instanceId);
 				voxels.removeAt(intersect.instanceId);
+				if (pos) onVoxelRemove?.(pos[0], pos[1], pos[2]);
 			}
 		} else {
 			tempVec.copy(intersect.point).add(intersect.face.normal);
-			voxels.add(
-				snapToGrid(tempVec.x),
-				snapToGrid(tempVec.y),
-				snapToGrid(tempVec.z),
-			);
+			const x = snapToGrid(tempVec.x);
+			const y = snapToGrid(tempVec.y);
+			const z = snapToGrid(tempVec.z);
+			voxels.add(x, y, z);
+			onVoxelAdd?.(x, y, z);
 		}
 	};
 
@@ -98,11 +104,11 @@ export const setupInteraction = ({
 		for (let w = -2; w <= 2; w++) {
 			for (let h = 0; h < 10; h++) {
 				for (let d = 0; d < 5; d++) {
-					voxels.add(
-						snapToGrid(startX + right.x * w * 50 + forward.x * d * 50),
-						snapToGrid(25 + h * 50),
-						snapToGrid(startZ + right.z * w * 50 + forward.z * d * 50),
-					);
+					const x = snapToGrid(startX + right.x * w * 50 + forward.x * d * 50);
+					const y = snapToGrid(25 + h * 50);
+					const z = snapToGrid(startZ + right.z * w * 50 + forward.z * d * 50);
+					voxels.add(x, y, z);
+					onVoxelAdd?.(x, y, z);
 				}
 			}
 		}
